@@ -66,7 +66,7 @@ Schizoaffective Disorder | 22337 | 791 |
 Tourette syndrome | 1 | 0 |
 
 
-**Graphics**
+**Graphs**
 
 For each disorder there is a Sankey diagram showing impact change between refORF and altORF for SNP-candidates. For example, diagram for Parkinsons's disease.
 
