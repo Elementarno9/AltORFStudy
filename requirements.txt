@@ -1,0 +1,7 @@
+numpy
+pandas
+sklearn
+plotly
+tqdm
+pqdm
+argparse
