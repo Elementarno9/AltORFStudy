@@ -68,7 +68,7 @@ Tourette syndrome | 1 | 0 |
 
 **Graphs**
 
-For each disorder there is a Sankey diagram showing impact change between refORF and altORF for SNP-candidates. For example, diagram for Parkinsons's disease.
+For each disorder there is a Sankey diagram showing impact change between refORF and altORF for SNP-candidates. For example, the diagram for Parkinsons's disease, only for max impacted SNPs. 
 
 <img width="937" alt="image" src="https://user-images.githubusercontent.com/90474946/169359077-49e8d5a0-f805-4446-8f7f-29a33c398cc0.png">
 
@@ -77,7 +77,7 @@ For each disorder there is a Sankey diagram showing impact change between refORF
 
 The program requires **python 3.6+** and all libraries from `requirements.txt`.
 
-**Important: ** Input data required to be in a format of OpenVar.
+**Important:** Input data required to be in a format of OpenVar.
 
 There is an example parallel run for Parkinson's disease data in folder 'Neurol_PD', where output will also be saved:
 
