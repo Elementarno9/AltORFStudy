@@ -329,7 +329,6 @@ def main():
     print("Adding information from GTEx...")
     top_impact_df = add_gtex_info(top_impact_df)
 
-
     print(f"Saving data.")
     save_df(impact_df, os.path.join(OUTPUT_PATH, 'impact.csv'))
     save_df(top_impact_df, os.path.join(OUTPUT_PATH, 'top_impact.csv'))
