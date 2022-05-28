@@ -72,6 +72,8 @@ For each disorder there is a Sankey diagram showing impact change between refORF
 
 <img width="937" alt="image" src="https://user-images.githubusercontent.com/90474946/169359077-49e8d5a0-f805-4446-8f7f-29a33c398cc0.png">
 
+Here you can find how many variants of each type change their effects to a specific one. For example, most of 149 missence variants in alternative proteins come from non-coding exons, 3' UTRs or they are synonymous. This graph give a brief overview to all candidates and may help to easily find the most interesting variants.
+
 ### Discussion
 
 There is an opinion that the alternative ORFs represent an overlooked layer of complexity in the coding potential of genomes and are transforming our current vision of the nature of coding genes. Our investigation shows that there are a lot of SNPs that potentially could cause a disorder due to their effect on the alternative ORFs. These SNPs are planned to become candidates for future functionality studies.

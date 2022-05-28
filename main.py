@@ -9,9 +9,6 @@ import argparse
 import os
 import requests
 
-DATA_PATH = os.path.join('output', '%s_annOnePerLine.tsv')
-INPUT_PATH = os.path.join('output', 'input_vcf.vcf')
-OUTPUT_PATH = ''
 CONFIG = {
     'EMPTY_TAG': 'EMPTY',
     'IMPACTS': {
@@ -21,7 +18,6 @@ CONFIG = {
         'HIGH': 3
     }
 }
-input_df = None
 
 
 def read_tsv_data(path):
@@ -32,7 +28,7 @@ def read_tsv_data(path):
 
 
 def read_vcf_data(path):
-    """Read .tsv file as DataFrame"""
+    """Read .vcf file as DataFrame"""
     df = pd.read_csv(path, sep='\t', header=None).fillna(CONFIG['EMPTY_TAG'])
     return df
 
@@ -63,19 +59,15 @@ def str2list(s):
     return s.split(',')
 
 
-def get_rsid(chrom, pos):
-    """Recieve rsID from raw data
-
-    important: input_df have to be loaded before calling this function"""
-    global input_df
-
+def get_rsid(chrom, pos, input_df):
+    """Recieve rsID from raw data"""
     res = input_df[(input_df[0] == int(chrom)) & (input_df[1] == int(pos))]
     if len(res) == 0:
         return None
     return res.iloc[0, 2]
 
 
-def group_snps_by_transcript(df):
+def group_snps_by_transcript(df, input_df):
     """Group all rows with SNPs by chromosome & position and divide them by reference and alternative protein"""
     snp_groups = {}
 
@@ -114,7 +106,7 @@ def group_snps_by_transcript(df):
             }
 
         snp_groups[chrom_pos][transcript_id][t].append({
-            'ID': get_rsid(row['CHROM'], row['POS']),
+            'ID': get_rsid(row['CHROM'], row['POS'], input_df),
             'CHROM': row['CHROM'],
             'POS': row['POS'],
             'REF': row['REF'],
@@ -214,9 +206,10 @@ def add_gtex_info(df):
     return df.join(tissue_df)
 
 
-def plot_sankey_of_effects(df, tag):
+def plot_sankey_of_effects(df, base_path, tag):
     """Plot sankey of changing of SNPs' effects"""
     effect_grouped = df.groupby(['REF_EFFECT', 'ALT_EFFECT']).size().reset_index()
+    ref_count, alt_count = [effect_grouped.groupby(e).sum().reset_index() for e in ['REF_EFFECT', 'ALT_EFFECT']]
     effect_unique = pd.unique(pd.concat([effect_grouped['REF_EFFECT'], effect_grouped['ALT_EFFECT']]))
 
     le = LabelEncoder()
@@ -225,6 +218,17 @@ def plot_sankey_of_effects(df, tag):
     target = le.transform(effect_grouped['ALT_EFFECT']) + len(le.classes_)
     weights = effect_grouped[0]
     labels = le.classes_.tolist() * 2
+
+    for i, label in enumerate(labels):
+        if i < len(le.classes_):
+            row = ref_count[ref_count['REF_EFFECT'] == label]
+        else:
+            row = alt_count[alt_count['ALT_EFFECT'] == label]
+
+        count = int(row[0]) if len(row) == 1 else 0
+
+        labels[i] = f'{label} ({count})'
+
     node_colors = px.colors.qualitative.Set1 + px.colors.qualitative.Set2 + px.colors.qualitative.Set3
     link_colors = np.array((px.colors.qualitative.Pastel1 + px.colors.qualitative.Pastel2) * 2)
     link_colors = link_colors[source]
@@ -243,6 +247,8 @@ def plot_sankey_of_effects(df, tag):
             value=weights,
             color=link_colors
         ))])
+
+    fig.update_traces(name='label+value')
 
     fig.update_layout(annotations=[{
         'xref': 'paper',
@@ -266,14 +272,12 @@ def plot_sankey_of_effects(df, tag):
                       title_font_size=32,
                       font_size=14)
 
-    fig.write_image(os.path.join(OUTPUT_PATH, f"sankey_effect_{tag}.png"), width=1000, height=600)
+    fig.write_image(os.path.join(base_path, f"sankey_effect_{tag}.png"), width=1000, height=600)
+    fig.write_html(os.path.join(base_path, f"sankey_effect_{tag}.html"))
     fig.show()
 
 
 def main():
-    global DATA_PATH, INPUT_PATH, OUTPUT_PATH
-    global input_df
-
     # Parse arguments
     parser = argparse.ArgumentParser(description='Process some integers.')
     parser.add_argument('--input', required=True, help="Path to the folder with OpenVar data.")
@@ -291,15 +295,15 @@ def main():
         args.output = args.input
 
     # Load data
-    INPUT_PATH = os.path.join(args.input, INPUT_PATH)
-    DATA_PATH = os.path.join(args.input, DATA_PATH % args.name)
+    INPUT_PATH = os.path.join(args.input, 'output', 'input_vcf.vcf')
+    DATA_PATH = os.path.join(args.input, 'output', f'{args.name}_annOnePerLine.tsv')
     OUTPUT_PATH = args.output
 
     if args.only_sankey:
         filename = os.path.join(OUTPUT_PATH, 'top_impact.csv')
         print(f'Plotting sankey for {filename}')
         top_impact_df = pd.read_csv(filename).fillna('')
-        plot_sankey_of_effects(top_impact_df, 'top')
+        plot_sankey_of_effects(top_impact_df, OUTPUT_PATH, 'top')
         return
 
     if not os.path.exists(DATA_PATH):
@@ -313,7 +317,7 @@ def main():
     print(f'Data loaded from {DATA_PATH}. Total {len(df)} rows.')
 
     # Main part
-    snp_groups = group_snps_by_transcript(df)
+    snp_groups = group_snps_by_transcript(df, input_df)
     print(f'Grouped into {len(snp_groups)} different variants.')
     max_impact_snps = get_max_impact_snps(snp_groups, parallel=args.parallel)
 
@@ -335,7 +339,7 @@ def main():
 
     # Plot graphics
     if len(top_impact_df) > 0:
-        plot_sankey_of_effects(top_impact_df, 'top')
+        plot_sankey_of_effects(top_impact_df, OUTPUT_PATH, 'top')
 
 
 if __name__ == '__main__':
