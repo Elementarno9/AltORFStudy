@@ -70,7 +70,7 @@ Tourette syndrome | 1 | 0 |
 
 For each disorder there is a Sankey diagram showing impact change between refORF and altORF for SNP-candidates. For example, the diagram for Parkinsons's disease, only for max impacted SNPs. 
 
-<img width="937" alt="image" src="https://user-images.githubusercontent.com/90474946/169359077-49e8d5a0-f805-4446-8f7f-29a33c398cc0.png">
+![telegram-cloud-document-2-5228978032676445308](https://user-images.githubusercontent.com/90474946/170836503-85c65c20-b8c9-4b9a-9fb1-5611fe1eb2e7.jpg)
 
 Here you can find how many variants of each type change their effects to a specific one. For example, most of 149 missence variants in alternative proteins come from non-coding exons, 3' UTRs or they are synonymous. This graph give a brief overview to all candidates and may help to easily find the most interesting variants.
 
